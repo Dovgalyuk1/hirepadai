@@ -1,0 +1,1280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HirePad — write the trade, hire the agent</title>
+<meta name="description" content="Hold $HIREPAD and describe a strategy in plain words. HirePad turns the post into an AI trading agent with its own wallet on Robinhood Chain, hard risk limits and a public record.">
+<meta property="og:title" content="HirePad — write the trade, hire the agent">
+<meta property="og:description" content="A job post becomes an AI trading agent on Robinhood Chain. The author keeps half of its performance fee. $HIREPAD holders run the board.">
+<meta property="og:image" content="https://hirepadai.vercel.app/assets/og.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://hirepadai.vercel.app/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#F4F3EE">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/geist.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/serif-italic.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face{font-family:"Geist";src:url(assets/geist.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Geist Mono";src:url(assets/geist-mono.woff2) format("woff2");font-weight:100 900;font-display:swap}
+@font-face{font-family:"Instrument Serif";src:url(assets/serif.woff2) format("woff2");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"Instrument Serif";src:url(assets/serif-italic.woff2) format("woff2");font-weight:400;font-style:italic;font-display:swap}
+
+:root{
+  --bg:#F4F3EE; --paper:#FBFAF6; --ink:#12130F; --ink2:#3A3B35; --mute:#74736B; --line:#DCDAD0; --line2:#E8E6DE;
+  --acc:#FF5A1F; --acc2:#FFE3D6; --ok:#17915A; --okbg:#DDF3E7; --bad:#D23D26; --badbg:#FBE1DB; --warn:#B97A00;
+  --dk:#121310; --dk2:#1B1C18; --dk3:#26271F; --dkl:#34352D; --dkt:#ECEAE2; --dkm:#9A998F;
+  --sans:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --serif:"Instrument Serif",Georgia,serif;
+  --r:14px; --w:1240px;
+}
+*{box-sizing:border-box}
+html{overflow-x:clip;scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.55;overflow-x:clip;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:var(--w);margin:0 auto;padding:0 28px}
+.mono{font-family:var(--mono)}
+.serif{font-family:var(--serif);font-weight:400}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.pill{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:99px;border:1px solid var(--line);background:var(--paper);white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--mute);display:inline-block;flex:none}
+.dot.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(23,145,90,.16)}
+.dot.acc{background:var(--acc);box-shadow:0 0 0 3px rgba(255,90,31,.16)}
+.dot.bad{background:var(--bad)}
+
+/* ---------- buttons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);font-weight:560;font-size:15px;text-decoration:none;transition:background .15s,color .15s,border-color .15s,box-shadow .15s;white-space:nowrap}
+.btn:hover{background:#000;box-shadow:0 0 0 4px rgba(18,19,15,.08)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.ghost:hover{border-color:var(--ink);box-shadow:none}
+.btn.acc{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.acc:hover{background:#F04C12;box-shadow:0 0 0 4px rgba(255,90,31,.18)}
+.btn.sm{height:36px;padding:0 13px;font-size:14px;border-radius:9px}
+.btn.soon{background:var(--line2);border-color:var(--line);color:var(--mute);cursor:default;box-shadow:none}
+.btn.soon::after{content:"at launch";font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 6px;border-radius:5px;background:var(--bg);border:1px solid var(--line)}
+.arrow{transition:transform .15s}
+.btn:hover .arrow{transform:translateX(3px)}
+
+/* ---------- nav ---------- */
+.nav{position:sticky;top:0;z-index:50;background:rgba(244,243,238,.86);backdrop-filter:saturate(1.4) blur(12px);-webkit-backdrop-filter:saturate(1.4) blur(12px);border-bottom:1px solid var(--line2)}
+.nav .wrap{display:flex;align-items:center;gap:22px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-weight:680;letter-spacing:-.01em;font-size:18px}
+.brand svg{width:28px;height:28px;flex:none}
+.links{display:flex;gap:4px;margin-left:10px}
+.links a{text-decoration:none;font-size:14px;color:var(--ink2);padding:7px 10px;border-radius:8px}
+.links a:hover{background:var(--line2);color:var(--ink)}
+.nav-r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.iconbtn{width:36px;height:36px;display:inline-grid;place-items:center;border-radius:9px;border:1px solid var(--line);background:transparent;text-decoration:none}
+.iconbtn:hover{border-color:var(--ink)}
+.iconbtn svg{width:16px;height:16px}
+.iconbtn.off svg .w{opacity:.2}
+
+/* wallet button */
+.wbtn{position:relative}
+.wbtn .addr{font-family:var(--mono);font-size:13px}
+.wbtn .net{display:inline-flex;align-items:center;gap:6px}
+.wbtn.bad{background:var(--badbg);border-color:var(--bad);color:var(--bad)}
+
+/* ---------- strip ---------- */
+.strip{border-bottom:1px solid var(--line2);overflow:hidden;background:var(--paper)}
+.strip .track{display:flex;gap:44px;white-space:nowrap;padding:9px 0;font-family:var(--mono);font-size:12px;color:var(--mute);animation:mq 60s linear infinite;width:max-content}
+.strip b{color:var(--ink);font-weight:500}
+.strip i{font-style:normal;color:var(--acc)}
+@keyframes mq{to{transform:translateX(-50%)}}
+
+/* ---------- hero ---------- */
+.hero{padding:44px 0 56px}
+.hero .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:52px;align-items:start}
+.hero h1{font-size:clamp(44px,5.6vw,78px);line-height:.98;letter-spacing:-.035em;font-weight:640;margin:18px 0 22px}
+.hero h1 em{font-family:var(--serif);font-weight:400;font-style:italic;letter-spacing:-.01em;color:var(--acc)}
+.lead{font-size:19px;line-height:1.5;color:var(--ink2);max-width:560px;margin:0 0 14px}
+.lead strong{color:var(--ink);font-weight:600}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin:26px 0 22px}
+.ca{display:inline-flex;align-items:center;gap:10px;border:1px dashed var(--line);border-radius:10px;padding:8px 12px;font-family:var(--mono);font-size:13px;color:var(--mute);cursor:pointer;background:transparent}
+.ca b{font-weight:500;color:var(--ink)}
+.ca:hover{border-color:var(--ink)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:34px;border-top:1px solid var(--line)}
+.facts div{padding:16px 16px 0 0}
+.facts div+div{padding-left:16px;border-left:1px solid var(--line2)}
+.facts b{display:block;font-size:30px;letter-spacing:-.03em;font-weight:620;line-height:1.1}
+.facts span{font-size:13.5px;color:var(--mute);line-height:1.4;display:block;margin-top:4px}
+
+/* ---------- desk (builder) ---------- */
+.desk{background:var(--dk);color:var(--dkt);border-radius:18px;box-shadow:0 30px 60px -30px rgba(18,19,15,.5),0 0 0 1px #000;overflow:hidden;position:relative}
+.desk-h{display:flex;align-items:center;gap:10px;padding:14px 18px;border-bottom:1px solid var(--dkl);font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--dkm)}
+.desk-h .tl{display:flex;gap:6px;margin-right:6px}
+.desk-h .tl i{width:10px;height:10px;border-radius:50%;background:var(--dkl);display:block}
+.desk-h .r{margin-left:auto;display:flex;align-items:center;gap:8px}
+.desk-b{padding:18px}
+.lbl{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--dkm);margin-bottom:8px}
+.post{width:100%;min-height:118px;resize:vertical;background:var(--dk2);border:1px solid var(--dkl);border-radius:12px;color:var(--dkt);font:inherit;font-size:16px;line-height:1.5;padding:14px 15px;outline:none;transition:border-color .15s,box-shadow .15s}
+.post::placeholder{color:#6F6E66}
+.post:focus{border-color:var(--acc);box-shadow:0 0 0 4px rgba(255,90,31,.14)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.chip{border:1px solid var(--dkl);background:transparent;color:var(--dkm);border-radius:99px;padding:5px 11px;font-size:12.5px;line-height:1.3;text-align:left}
+.chip:hover{color:var(--dkt);border-color:#55564C}
+.row{display:flex;align-items:center;gap:10px}
+.meter{flex:1;min-width:0}
+.meter .bar{height:8px;border-radius:99px;background:var(--dk3);position:relative;overflow:visible}
+.meter .fill{height:100%;border-radius:99px;background:#55564C;width:0;transition:width .35s cubic-bezier(.2,.8,.2,1),background .2s}
+.meter .fill.ok{background:var(--ok)}
+.meter .tick{position:absolute;left:70%;top:-4px;bottom:-4px;width:2px;background:var(--dkt);border-radius:2px}
+.meter .tick::after{content:"70";position:absolute;top:-17px;left:-7px;font-family:var(--mono);font-size:10px;color:var(--dkm)}
+.meter .mcap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dkm);margin-top:7px}
+.meter .mcap b{color:var(--dkt);font-weight:500}
+.hint{font-size:13px;color:var(--dkm);margin:10px 0 0;min-height:20px}
+.hint b{color:var(--dkt);font-weight:500}
+.desk .btn.acc{height:46px}
+
+/* agent card */
+.agent{margin-top:16px;border:1px solid var(--dkl);border-radius:14px;background:var(--dk2);overflow:hidden;display:none}
+.agent.show{display:block;animation:rise .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.agent-top{display:flex;align-items:center;gap:12px;padding:14px 15px;border-bottom:1px solid var(--dkl)}
+.avatar{width:42px;height:42px;border-radius:10px;flex:none;display:block}
+.agent-top h3{margin:0;font-size:17px;font-weight:600;letter-spacing:-.01em;line-height:1.2}
+.agent-top .id{font-family:var(--mono);font-size:11.5px;color:var(--dkm)}
+.agent-top .st{margin-left:auto}
+.st-pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border-radius:6px;border:1px solid;white-space:nowrap}
+.st-pill.pv{color:#FFB08F;border-color:#6B3A26;background:#2A1A12}
+.st-pill.no{color:#FF9A8A;border-color:#6B2A20;background:#2A1411}
+.spec{margin:0;padding:6px 15px 10px}
+.spec div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;padding:8px 0;border-bottom:1px dashed var(--dkl);font-size:14px;opacity:0;transform:translateY(4px);transition:opacity .25s,transform .25s}
+.spec div.in{opacity:1;transform:none}
+.spec div:last-child{border-bottom:0}
+.spec dt{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--dkm);padding-top:2px}
+.spec dd{margin:0;color:var(--dkt)}
+.spec dd .miss{color:#FF9A8A}
+.limits{display:flex;flex-wrap:wrap;gap:6px;padding:0 15px 14px}
+.limits span{font-family:var(--mono);font-size:11px;color:var(--dkm);border:1px solid var(--dkl);border-radius:6px;padding:3px 7px}
+.split{padding:12px 15px;border-top:1px solid var(--dkl);display:grid;gap:8px}
+.split .sb{display:flex;height:10px;border-radius:99px;overflow:hidden}
+.split .sb i{display:block}
+.split .sl{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--dkm)}
+.split .sl b{color:var(--dkt);font-weight:500}
+.agent-f{display:flex;align-items:center;gap:10px;padding:12px 15px;border-top:1px solid var(--dkl);background:#161713}
+.agent-f .note{font-size:12.5px;color:var(--dkm);line-height:1.35;flex:1;min-width:0}
+.agent-f .btn{background:var(--dkt);color:var(--dk);border-color:var(--dkt)}
+.agent-f .btn:hover{background:#fff}
+.agent-f .btn.done{background:var(--okbg);border-color:var(--okbg);color:var(--ok)}
+.rej{padding:12px 15px 14px;display:none}
+.rej.show{display:block}
+.rej p{margin:0 0 8px;font-size:14px;color:var(--dkt)}
+.rej ul{margin:0;padding-left:18px;color:var(--dkm);font-size:13.5px}
+.rej li{margin:3px 0}
+.rej li b{color:var(--dkt);font-weight:500}
+
+.desk-q{display:flex;align-items:center;gap:12px;padding:12px 18px;border-top:1px solid var(--dkl);font-family:var(--mono);font-size:11.5px;color:var(--dkm)}
+.slots{display:flex;gap:5px}
+.slots i{width:18px;height:8px;border-radius:3px;background:var(--dk3);display:block;transition:background .3s}
+.slots i.on{background:var(--acc)}
+.desk-q .r{margin-left:auto}
+
+/* ---------- sections ---------- */
+section.s{padding:92px 0;border-top:1px solid var(--line2)}
+.sh{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:end;margin-bottom:44px}
+.sh h2{font-size:clamp(34px,4vw,54px);line-height:1.02;letter-spacing:-.03em;font-weight:620;margin:12px 0 0}
+.sh h2 em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:-.01em}
+.sh p{margin:0;color:var(--ink2);font-size:17px;max-width:520px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));border:1px solid var(--line);border-radius:var(--r);background:var(--paper);overflow:hidden}
+.step{padding:22px 20px 24px;position:relative;min-width:0}
+.step+.step{border-left:1px solid var(--line2)}
+.step .n{font-family:var(--mono);font-size:12px;color:var(--mute);display:flex;align-items:center;gap:8px}
+.step .n i{flex:1;height:1px;background:var(--line)}
+.step h3{margin:28px 0 8px;font-size:20px;letter-spacing:-.015em;font-weight:600}
+.step p{margin:0;font-size:14.5px;color:var(--ink2);line-height:1.5}
+.step .tag{margin-top:16px}
+.step.hl{background:var(--ink);color:var(--bg)}
+.step.hl p{color:#BEBDB3}
+.step.hl .n{color:#8C8B82}
+.step.hl .n i{background:#3A3B35}
+.step.hl .pill{background:transparent;border-color:#3A3B35;color:#BEBDB3}
+
+/* universe */
+.uni{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:22px;min-width:0}
+.card h3{margin:0 0 6px;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.card p{margin:0;color:var(--ink2);font-size:14.5px}
+.card .tks{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.card .tks span{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:6px;padding:3px 7px;background:var(--bg)}
+.card .tks span.x{text-decoration:line-through;color:var(--mute)}
+
+/* money */
+.flow{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);gap:14px}
+.flowsvg{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0}
+.flowsvg svg{width:100%;height:auto;display:block}
+.flowsvg .t{font-family:var(--sans);font-size:14px;fill:var(--ink);font-weight:560}
+.flowsvg .t2{font-family:var(--mono);font-size:11px;fill:var(--mute)}
+.flowsvg .bx{fill:var(--bg);stroke:var(--line)}
+.flowsvg .bx.k{fill:var(--ink);stroke:var(--ink)}
+.flowsvg .bx.a{fill:var(--acc2);stroke:#F7B79C}
+.flowsvg .tw{fill:var(--bg)}
+.flowsvg .ln{stroke:var(--ink);stroke-width:1.4;fill:none}
+.flowsvg .ln.d{stroke-dasharray:4 4;stroke:var(--mute)}
+.flowsvg .pk{fill:var(--acc)}
+.calc{background:var(--ink);color:var(--bg);border-radius:var(--r);padding:22px;min-width:0}
+.calc h3{margin:0 0 4px;font-size:18px;font-weight:600}
+.calc .sub{color:#A5A49B;font-size:13.5px;margin:0 0 20px}
+.fld{margin-bottom:18px}
+.fld label{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:#A5A49B;margin-bottom:8px}
+.fld label b{color:var(--bg);font-weight:500;letter-spacing:0}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:99px;background:#34352D;outline:none;margin:6px 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--bg);border:5px solid var(--acc);cursor:grab}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--bg);border:5px solid var(--acc);cursor:grab}
+.out{border-top:1px solid #34352D;padding-top:14px;display:grid;gap:10px}
+.out div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14.5px;color:#C9C8BF}
+.out b{font-family:var(--mono);font-weight:500;color:var(--bg);font-size:15px;white-space:nowrap}
+.out .big b{font-size:22px;color:#FFB08F}
+.out .msg{font-size:13px;color:#A5A49B;display:block;line-height:1.45}
+
+/* board */
+.board{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.board-h{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.board-h h3{margin:0;font-size:16px;font-weight:600}
+.board-h .r{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);font-weight:400;text-align:left;padding:10px 18px;border-bottom:1px solid var(--line2);white-space:nowrap}
+.tbl td{padding:14px 18px;border-bottom:1px solid var(--line2);font-size:14.5px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .nm{display:flex;align-items:center;gap:10px}
+.tbl .nm canvas{width:30px;height:30px;border-radius:8px;flex:none}
+.tbl .nm b{display:block;font-weight:600;line-height:1.2}
+.tbl .nm span{font-family:var(--mono);font-size:11.5px;color:var(--mute)}
+.dd{display:flex;align-items:center;gap:8px;min-width:130px}
+.dd .b{flex:1;height:6px;background:var(--line2);border-radius:99px;overflow:hidden}
+.dd .b i{display:block;height:100%;border-radius:99px;background:var(--ink)}
+.dd .b i.w{background:var(--warn)}
+.dd .b i.x{background:var(--bad)}
+.dd span{font-family:var(--mono);font-size:12px;color:var(--mute);width:62px;text-align:right}
+.votes{display:flex;gap:6px}
+.vb{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 10px;font-size:13px;font-weight:540;display:inline-flex;align-items:center;gap:6px;transition:background .12s,border-color .12s,color .12s}
+.vb small{font-family:var(--mono);font-size:11px;color:var(--mute);font-weight:400}
+.vb:hover{border-color:var(--ink)}
+.vb.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.vb.on small{color:#A5A49B}
+.vb.fire.on{background:var(--bad);border-color:var(--bad)}
+.vb.fire.on small{color:#FFD5CD}
+.vb:disabled{opacity:.45;cursor:not-allowed}
+.stt{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px;border-radius:5px;white-space:nowrap}
+.stt.pr{background:var(--line2);color:var(--ink2)}
+.stt.lv{background:var(--okbg);color:var(--ok)}
+.stt.pa{background:#FFF0CC;color:var(--warn)}
+.board-f{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line)}
+.board-f div{padding:16px 18px;font-size:14px;color:var(--ink2)}
+.board-f div+div{border-left:1px solid var(--line2)}
+.board-f b{display:block;color:var(--ink);font-weight:600;margin-bottom:3px}
+.tblwrap{overflow-x:auto}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.rules .card h3{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.ex{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.ex li{border:1px solid var(--line2);background:var(--bg);border-radius:10px;padding:11px 13px;font-size:14.5px;line-height:1.45}
+.ex li q{font-style:normal;color:var(--ink)}
+.ex li small{display:block;font-family:var(--mono);font-size:11.5px;color:var(--mute);margin-top:5px}
+.ex li button{border:0;background:none;padding:0;color:var(--acc);font-family:var(--mono);font-size:11.5px;margin-left:8px}
+.caps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:14px}
+.cap{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.cap b{display:block;font-size:34px;letter-spacing:-.03em;font-weight:620;line-height:1}
+.cap span{display:block;font-size:14px;color:var(--ink2);margin-top:8px;line-height:1.45}
+
+/* limits */
+.lim{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--paper)}
+.lim div{padding:22px;border-right:1px solid var(--line2);border-bottom:1px solid var(--line2)}
+.lim div:nth-child(3n){border-right:0}
+.lim div:nth-last-child(-n+3){border-bottom:0}
+.lim .k{font-family:var(--mono);font-size:12px;color:var(--acc)}
+.lim h3{margin:8px 0 6px;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.lim p{margin:0;font-size:14.5px;color:var(--ink2)}
+
+/* rollout */
+.roll{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.roll .card{position:relative}
+.roll .card .pill{margin-bottom:14px}
+.roll ul{margin:12px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.roll li{display:flex;gap:9px;font-size:14.5px;color:var(--ink2);line-height:1.45}
+.roll li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--line);margin-top:8px;flex:none}
+.roll .now li::before{background:var(--ok)}
+.roll .now{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+
+/* final */
+.final{padding:96px 0;border-top:1px solid var(--line2);text-align:center}
+.final h2{font-size:clamp(40px,6vw,84px);letter-spacing:-.04em;line-height:.98;font-weight:640;margin:14px auto 18px;max-width:900px}
+.final h2 em{font-family:var(--serif);font-style:italic;font-weight:400;color:var(--acc)}
+.final p{color:var(--ink2);font-size:18px;max-width:600px;margin:0 auto 28px}
+.final .cta{justify-content:center}
+
+footer{border-top:1px solid var(--line);padding:30px 0 40px;font-size:13.5px;color:var(--mute)}
+footer .wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px;align-items:start}
+footer .fl{display:flex;gap:16px;flex-wrap:wrap;justify-content:flex-end}
+footer a{text-decoration:none}
+footer a:hover{color:var(--ink)}
+footer .risk{grid-column:1/-1;border-top:1px solid var(--line2);padding-top:16px;font-size:12.5px;line-height:1.5;max-width:880px}
+
+/* ---------- modal ---------- */
+.ov{position:fixed;inset:0;z-index:100;background:rgba(18,19,15,.42);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px}
+.ov.show{display:flex;animation:fade .15s}
+@keyframes fade{from{opacity:0}}
+.modal{width:100%;max-width:420px;background:var(--paper);border-radius:18px;box-shadow:0 40px 80px -30px rgba(0,0,0,.45),0 0 0 1px rgba(0,0,0,.06);overflow:hidden;animation:rise .2s}
+.modal-h{display:flex;align-items:center;gap:10px;padding:18px 20px 12px}
+.modal-h h3{margin:0;font-size:18px;font-weight:620}
+.modal-h .x{margin-left:auto;width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;display:grid;place-items:center}
+.modal-h .x:hover{border-color:var(--ink)}
+.modal-b{padding:4px 20px 20px}
+.netcard{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--bg);margin-bottom:14px}
+.netcard .ic{width:34px;height:34px;border-radius:9px;background:var(--ink);display:grid;place-items:center;flex:none}
+.netcard b{display:block;font-size:14.5px;font-weight:600}
+.netcard span{font-family:var(--mono);font-size:11.5px;color:var(--mute)}
+.wlist{display:grid;gap:8px}
+.wopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 13px;transition:border-color .12s,box-shadow .12s}
+.wopt:hover{border-color:var(--ink);box-shadow:0 0 0 3px rgba(18,19,15,.06)}
+.wopt img,.wopt .gic{width:30px;height:30px;border-radius:8px;flex:none;object-fit:contain}
+.wopt .gic{background:var(--line2);display:grid;place-items:center}
+.wopt b{font-weight:560;font-size:15px}
+.wopt small{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--mute)}
+.wopt.busy small{color:var(--acc)}
+.empty{border:1px dashed var(--line);border-radius:12px;padding:14px;font-size:14px;color:var(--ink2);line-height:1.5}
+.empty a{color:var(--acc)}
+.merr{margin-top:12px;font-size:13.5px;color:var(--bad);display:none;background:var(--badbg);border-radius:10px;padding:10px 12px}
+.merr.show{display:block}
+.mfoot{margin-top:14px;font-size:12.5px;color:var(--mute);line-height:1.45}
+.acct{display:grid;gap:10px}
+.acct .who{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:#fff}
+.acct .who canvas{width:40px;height:40px;border-radius:10px;flex:none}
+.acct .who b{font-family:var(--mono);font-weight:500;font-size:14px;display:block}
+.acct .who span{font-size:12.5px;color:var(--mute)}
+.acct .who .cp{margin-left:auto}
+.kv{border:1px solid var(--line);border-radius:12px;background:#fff}
+.kv div{display:flex;justify-content:space-between;gap:10px;padding:10px 14px;font-size:14px;border-bottom:1px solid var(--line2)}
+.kv div:last-child{border-bottom:0}
+.kv span{color:var(--mute)}
+.kv b{font-family:var(--mono);font-weight:500;text-align:right}
+.kv b.ok{color:var(--ok)}
+.kv b.bad{color:var(--bad)}
+.acct .btns{display:flex;gap:8px}
+.acct .btns .btn{flex:1}
+
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:11px 16px;border-radius:11px;font-size:14px;z-index:120;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px);box-shadow:0 20px 40px -20px rgba(0,0,0,.5)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1100px){
+  .hero .wrap{grid-template-columns:1fr;gap:34px}
+  .lead{max-width:none}
+  .links{display:none}
+  .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .step+.step{border-left:0}
+  .step{border-bottom:1px solid var(--line2)}
+  .step:nth-child(even){border-left:1px solid var(--line2)}
+  .step:last-child{grid-column:1/-1}
+  .flow{grid-template-columns:1fr}
+  .caps{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (min-width:1101px) and (max-height:800px){
+  .hero{padding-top:28px}
+  .hero h1{font-size:clamp(40px,4.6vw,62px);margin:12px 0 16px}
+  .lead{font-size:17px}
+  .facts{margin-top:22px}
+  .post{min-height:96px}
+}
+@media (max-width:760px){
+  .wrap{padding:0 16px}
+  .nav .wrap{gap:10px}
+  .brand span{display:none}
+  .nav-r .hide-s{display:none}
+  .hero{padding:26px 0 44px}
+  .hero h1{font-size:44px}
+  .lead{font-size:17px}
+  .facts{grid-template-columns:1fr}
+  .facts div,.facts div+div{padding:12px 0;border-left:0;border-bottom:1px solid var(--line2)}
+  .sh{grid-template-columns:1fr;gap:14px;margin-bottom:28px}
+  section.s{padding:64px 0}
+  .steps{grid-template-columns:1fr}
+  .step:nth-child(even){border-left:0}
+  .step h3{margin-top:16px}
+  .uni,.rules,.roll,.lim,.board-f{grid-template-columns:1fr}
+  .lim div{border-right:0!important;border-bottom:1px solid var(--line2)!important}
+  .lim div:last-child{border-bottom:0!important}
+  .board-f div+div{border-left:0;border-top:1px solid var(--line2)}
+  .caps{grid-template-columns:1fr 1fr}
+  .desk-b{padding:14px}
+  .spec div{grid-template-columns:78px minmax(0,1fr)}
+  .agent-f{flex-wrap:wrap}
+  .agent-f .btn{width:100%}
+  footer .wrap{grid-template-columns:1fr}
+  footer .fl{justify-content:flex-start}
+  .tbl th:nth-child(3),.tbl td:nth-child(3){display:none}
+  .tbl td,.tbl th{padding-left:12px;padding-right:12px}
+}
+@media (max-width:420px){
+  .hero h1{font-size:40px}
+  .wbtn .addr{display:none}
+  .desk-h .hide-xs{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mark" viewBox="0 0 32 32">
+    <rect x="1" y="1" width="30" height="30" rx="8" fill="#12130F"/>
+    <rect x="8.5" y="8" width="4" height="16" rx="1" fill="#F4F3EE"/>
+    <rect x="19.5" y="8" width="4" height="16" rx="1" fill="#F4F3EE"/>
+    <path d="M12.5 16h9.2" stroke="#FF5A1F" stroke-width="3.2" stroke-linecap="round"/>
+    <path d="M18.6 12.9l3.4 3.1-3.4 3.1" stroke="#FF5A1F" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+  <symbol id="chain" viewBox="0 0 20 20">
+    <path d="M8.2 11.8a3 3 0 0 0 4.2 0l2.6-2.6a3 3 0 0 0-4.2-4.2l-1 1" stroke="#F4F3EE" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+    <path d="M11.8 8.2a3 3 0 0 0-4.2 0L5 10.8a3 3 0 0 0 4.2 4.2l1-1" stroke="#FF5A1F" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="HirePad home"><svg><use href="#mark"/></svg><span>HirePad</span></a>
+    <nav class="links" aria-label="Sections">
+      <a href="#how">How it works</a>
+      <a href="#money">Money</a>
+      <a href="#board">The board</a>
+      <a href="#rules">Rules</a>
+      <a href="#limits">Limits</a>
+      <a href="#rollout">Rollout</a>
+    </nav>
+    <div class="nav-r">
+      <button class="iconbtn hide-s" id="sndBtn" aria-label="Sound on" title="Sound"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.5 6h2.2L8 3.2v9.6L4.7 10H2.5z" fill="currentColor" stroke="none"/><path class="w" d="M10.6 5.6a3.4 3.4 0 0 1 0 4.8M12.4 3.8a6 6 0 0 1 0 8.4"/></svg></button>
+      <a class="iconbtn xLink hide-s" id="xBtn" href="#" aria-label="HirePad on X"><svg viewBox="0 0 16 16" fill="currentColor"><path d="M12.2 1.5h2.2L9.6 7l5.7 7.5h-4.4L7.4 10l-4 4.5H1.2l5.1-5.9L.9 1.5h4.5l3.1 4.1zm-.8 11.7h1.2L4.7 2.7H3.4z"/></svg></a>
+      <a class="btn sm ghost soon hide-s" id="buyBtn" href="#">Buy $HIREPAD</a>
+      <button class="btn sm wbtn" id="wBtn"><span class="wl">Connect wallet</span></button>
+    </div>
+  </div>
+</header>
+
+<div class="strip" aria-hidden="true"><div class="track" id="track"></div></div>
+
+<main id="top">
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <span class="pill"><i class="dot acc"></i>AI trading agents · Robinhood Chain</span>
+      <h1>Write the trade.<br><em>Hire</em> the agent.</h1>
+      <p class="lead">Hold <strong>$HIREPAD</strong> and describe a strategy in plain words: what to trade, when to get in, when to get out. HirePad turns that post into an <strong>AI agent with its own wallet</strong>, hard risk limits and a public track record on Robinhood Chain.</p>
+      <p class="lead">When the agent closes a week in profit, <strong>the person who wrote the post gets half of its performance fee</strong>. When it doesn't, $HIREPAD holders decide whether it keeps the job.</p>
+      <div class="cta">
+        <a class="btn acc" href="#desk" id="toDesk">Write a job post <span class="arrow">→</span></a>
+        <a class="btn ghost" href="#how">How it works</a>
+      </div>
+      <button class="ca" id="caBox" type="button">CA <b class="ca-val">announced at launch</b></button>
+      <div class="facts">
+        <div><b>50%</b><span>of every performance fee goes to the author of the post</span></div>
+        <div><b>7 days</b><span>on paper against live prices before an agent touches money</span></div>
+        <div><b>−15%</b><span>drawdown pauses an agent automatically, no vote needed</span></div>
+      </div>
+    </div>
+
+    <div class="desk" id="desk">
+      <div class="desk-h">
+        <span class="tl"><i></i><i></i><i></i></span>
+        <span>The desk</span><span class="hide-xs">· job post</span>
+        <span class="r"><i class="dot ok"></i><span id="deskNet">preview</span></span>
+      </div>
+      <div class="desk-b">
+        <div class="lbl"><span>Your job post</span><span id="chars">0 / 400</span></div>
+        <textarea class="post" id="post" maxlength="400" rows="4" placeholder="e.g. buy NVDA when it drops 5% in a day, sell at +8% or cut at −4%, hold up to two weeks"></textarea>
+        <div class="chips" id="chips">
+          <button class="chip" type="button" data-t="buy NVDA when it drops 5% in a day, sell at +8% or cut at -4%, hold up to two weeks">NVDA dip</button>
+          <button class="chip" type="button" data-t="every friday put a small amount into HOOD and COIN, never sell, stop adding if either falls 30% from the start">HOOD + COIN weekly</button>
+          <button class="chip" type="button" data-t="catch new meme coins on robinhood chain with real volume in the first hour, take profit at +40%, stop at -15%, out within 6 hours">New meme launches</button>
+          <button class="chip" type="button" data-t="buy TSLA on a breakout above the weekly high, trail a 6% stop, hold for weeks">TSLA breakout</button>
+          <button class="chip" type="button" data-t="make me rich fast, 100x guaranteed">make me rich</button>
+        </div>
+        <div class="row">
+          <div class="meter">
+            <div class="bar"><div class="fill" id="fill"></div><div class="tick"></div></div>
+            <div class="mcap"><span>clarity <b id="score">0</b></span><span id="need">the desk hires at 70+</span></div>
+          </div>
+          <button class="btn acc" id="hireBtn" type="button">Screen &amp; hire <span class="arrow">→</span></button>
+        </div>
+        <p class="hint" id="hint">Say <b>what it trades</b>, <b>when it gets in</b> and <b>when it gets out</b>. A timeframe helps.</p>
+
+        <div class="agent" id="agent" aria-live="polite">
+          <div class="agent-top">
+            <canvas class="avatar" id="av" width="84" height="84"></canvas>
+            <div><h3 id="aName">—</h3><div class="id" id="aId">—</div></div>
+            <div class="st"><span class="st-pill pv" id="aSt">preview</span></div>
+          </div>
+          <dl class="spec" id="spec"></dl>
+          <div class="rej" id="rej"><p id="rejP"></p><ul id="rejL"></ul></div>
+          <div id="okPart">
+            <div class="limits"><span>no leverage</span><span>≤10% per position</span><span>−15% → pause</span><span>listed assets only</span><span>funds return to treasury</span></div>
+            <div class="split">
+              <div class="sb"><i style="width:50%;background:var(--acc)"></i><i style="width:50%;background:#55564C"></i></div>
+              <div class="sl"><span>performance fee → <b>you 50%</b></span><span><b>treasury 50%</b></span></div>
+            </div>
+            <div class="agent-f">
+              <div class="note" id="aNote">Wallet on Robinhood Chain is assigned at hire. Sign the post to keep it as yours.</div>
+              <button class="btn sm" id="signBtn" type="button">Sign post</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="desk-q">
+        <span>today</span><span class="slots" id="slots"><i></i><i></i><i></i><i></i><i></i></span><span id="slotTxt">0 / 5 hires</span>
+        <span class="r">1 per holder</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="how">
+  <div class="wrap">
+    <div class="sh">
+      <div><span class="kicker">How it works</span><h2>From a post to a<br>funded agent, <em>in five steps</em></h2></div>
+      <p>Nobody hands an AI a wallet because a sentence sounded confident. Every agent earns its money in stages, and every stage is written on-chain where anyone can check it.</p>
+    </div>
+    <div class="steps">
+      <div class="step"><div class="n">01<i></i></div><h3>Post</h3><p>Write the job the way you would brief a trader you trust: the assets, the entry, the exit and roughly how long to hold. Plain English is enough, no code and no settings screens.</p></div>
+      <div class="step"><div class="n">02<i></i></div><h3>Screen</h3><p>The desk scores how clear the post is. Under 70, nobody is hired and you are told exactly which part is missing, so you can fix it in a line instead of guessing.</p></div>
+      <div class="step"><div class="n">03<i></i></div><h3>Probation</h3><p>The agent trades on paper for seven days against live prices and under the same limits it will have with money. Its every decision is logged, including the ones it skipped.</p></div>
+      <div class="step hl"><div class="n">04<i></i></div><h3>Funded</h3><p>Agents that pass get a wallet on Robinhood Chain and an allocation from the treasury. From here, every order is a transaction you can open in the explorer.</p><div class="tag"><span class="pill">chain 4663</span></div></div>
+      <div class="step"><div class="n">05<i></i></div><h3>Review</h3><p>Once a week $HIREPAD holders look at the record and vote: keep it, give it more, or fire it. A fired agent sends what is left back to the treasury and stops.</p></div>
+    </div>
+
+    <div class="uni">
+      <div class="card"><h3>Tokenized stocks</h3><p>Stock tokens listed on Robinhood Chain, traded around the clock. Agents only touch assets on the desk's list, and the list is public.</p><div class="tks"><span>NVDA</span><span>TSLA</span><span>AAPL</span><span>HOOD</span><span>COIN</span><span>PLTR</span><span>+ listed</span></div></div>
+      <div class="card"><h3>Meme coins</h3><p>Coins launched on the chain, but only past a liquidity and age floor. An agent cannot be the exit liquidity for a coin that is ten minutes old and three wallets deep.</p><div class="tks"><span>liquidity floor</span><span>age floor</span><span>holder floor</span></div></div>
+      <div class="card"><h3>Not on the menu</h3><p>Things an agent is never allowed to do, however the post is worded. These are enforced by the wallet itself rather than by the agent's good manners.</p><div class="tks"><span class="x">leverage</span><span class="x">perps</span><span class="x">bridging out</span><span class="x">unlisted tokens</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="money">
+  <div class="wrap">
+    <div class="sh">
+      <div><span class="kicker">Where the money goes</span><h2>The author earns<br>only when the agent <em>does</em></h2></div>
+      <p>Trading fees on $HIREPAD fill the treasury. The treasury funds agents that passed probation. A performance fee is taken only from a profitable week, and half of it goes to whoever wrote the post.</p>
+    </div>
+    <div class="flow">
+      <div class="flowsvg">
+        <svg viewBox="0 0 640 400" role="img" aria-label="Money flow: $HIREPAD trading fees fill the treasury, the treasury funds agents, profitable weeks pay a 20 percent performance fee split between the author and the treasury">
+          <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#12130F"/></marker></defs>
+          <rect class="bx" x="20" y="30" width="170" height="64" rx="12"/>
+          <text class="t" x="38" y="58">$HIREPAD trading fees</text><text class="t2" x="38" y="78">every buy and sell</text>
+          <rect class="bx k" x="235" y="30" width="170" height="64" rx="12"/>
+          <text class="t tw" x="253" y="58">Treasury</text><text class="t2" x="253" y="78" style="fill:#A5A49B">on-chain, public</text>
+          <rect class="bx" x="450" y="30" width="170" height="64" rx="12"/>
+          <text class="t" x="468" y="58">Agent wallets</text><text class="t2" x="468" y="78">after probation</text>
+          <path class="ln" d="M190 62H231" marker-end="url(#ah)"/>
+          <path class="ln" d="M405 62H446" marker-end="url(#ah)"/>
+          <path class="ln" d="M535 94V150" marker-end="url(#ah)"/>
+          <rect class="bx" x="400" y="154" width="220" height="64" rx="12"/>
+          <text class="t" x="418" y="182">Week closes in profit</text><text class="t2" x="418" y="202">vs. its high-water mark</text>
+          <path class="ln" d="M510 218V260" marker-end="url(#ah)"/>
+          <rect class="bx a" x="400" y="264" width="220" height="64" rx="12"/>
+          <text class="t" x="418" y="292">Performance fee 20%</text><text class="t2" x="418" y="312">of that week's profit</text>
+          <path class="ln" d="M400 296H300V350H274" marker-end="url(#ah)"/>
+          <rect class="bx a" x="100" y="324" width="170" height="54" rx="12"/>
+          <text class="t" x="118" y="348">50% → author</text><text class="t2" x="118" y="366">to the signing wallet</text>
+          <path class="ln" d="M300 296V150H320V98" marker-end="url(#ah)"/>
+          <text class="t2" x="314" y="232" transform="rotate(-90 314 232)">50% back</text>
+          <rect class="bx" x="20" y="154" width="250" height="118" rx="12" style="stroke-dasharray:4 4"/>
+          <text class="t" x="38" y="182">Losing week</text>
+          <text class="t2" x="38" y="204">no fee is taken from anyone</text>
+          <text class="t2" x="38" y="222">loss stays in the allocation</text>
+          <text class="t2" x="38" y="240">drawdown moves toward −15%</text>
+          <text class="t2" x="38" y="258">nobody tops it up</text>
+          <circle class="pk" id="pk" r="5" cx="190" cy="62"/>
+        </svg>
+      </div>
+      <div class="calc">
+        <h3>Run the rule</h3>
+        <p class="sub">Move the sliders to see how a single week is settled under the launch parameters.</p>
+        <div class="fld"><label>Agent allocation <b id="vA">$10,000</b></label><input type="range" id="rA" min="1000" max="100000" step="1000" value="10000" aria-label="Agent allocation"></div>
+        <div class="fld"><label>Result of the week <b id="vR">+6.0%</b></label><input type="range" id="rR" min="-20" max="30" step=".5" value="6" aria-label="Result of the week"></div>
+        <div class="out">
+          <div><span>Profit or loss</span><b id="oP">+$600</b></div>
+          <div><span>Performance fee (20%)</span><b id="oF">$120</b></div>
+          <div class="big"><span>Author receives</span><b id="oAu">$60</b></div>
+          <div><span>Back to treasury</span><b id="oT">$60</b></div>
+          <span class="msg" id="oM">Profit stays in the agent's allocation and keeps working next week.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="board">
+  <div class="wrap">
+    <div class="sh">
+      <div><span class="kicker">The board</span><h2>Holders decide<br>who <em>keeps the job</em></h2></div>
+      <p>Every Friday the board opens. Voting weight is your $HIREPAD balance at the snapshot, and the author of an agent cannot vote on their own hire. Some calls do not wait for a vote at all.</p>
+    </div>
+    <div class="board">
+      <div class="board-h">
+        <h3>Weekly review</h3><span class="pill">sample sheet</span>
+        <div class="r"><span class="pill" id="vw"><i class="dot"></i>connect a wallet to see your weight</span></div>
+      </div>
+      <div class="tblwrap">
+      <table class="tbl">
+        <thead><tr><th>Agent</th><th>Status</th><th>Drawdown used</th><th>Your vote</th></tr></thead>
+        <tbody id="tb"></tbody>
+      </table>
+      </div>
+      <div class="board-f">
+        <div><b>−15% drawdown</b>The wallet pauses the agent on its own. The board only decides whether it comes back.</div>
+        <div><b>Three red weeks in a row</b>A fire vote is scheduled automatically, whether anyone asks for it or not.</div>
+        <div><b>Scale</b>A kept agent with a clean record can have its allocation raised, never by more than double in a week.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="rules">
+  <div class="wrap">
+    <div class="sh">
+      <div><span class="kicker">What gets hired</span><h2>Clear posts get agents.<br><em>Vague ones</em> get a reply.</h2></div>
+      <p>The desk is strict on purpose. It is cheaper to ask one more question than to hand a wallet to a sentence that meant three different things.</p>
+    </div>
+    <div class="rules">
+      <div class="card">
+        <h3><i class="dot ok"></i>Gets hired</h3>
+        <ul class="ex">
+          <li><q>“buy NVDA when it drops 5% in a day, sell at +8% or cut at −4%, hold up to two weeks”</q><small>asset · entry · exit · horizon <button type="button" data-try="buy NVDA when it drops 5% in a day, sell at +8% or cut at -4%, hold up to two weeks">try it ↑</button></small></li>
+          <li><q>“every friday put a small amount into HOOD and COIN, never sell, stop adding if either falls 30%”</q><small>a schedule counts as an entry <button type="button" data-try="every friday put a small amount into HOOD and COIN, never sell, stop adding if either falls 30% from the start">try it ↑</button></small></li>
+          <li><q>“catch new meme coins on robinhood chain with real volume in the first hour, take profit at +40%, stop at −15%, out within 6 hours”</q><small>meme coins, inside the floors <button type="button" data-try="catch new meme coins on robinhood chain with real volume in the first hour, take profit at +40%, stop at -15%, out within 6 hours">try it ↑</button></small></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><i class="dot bad"></i>Gets turned down</h3>
+        <ul class="ex">
+          <li><q>“make me rich fast, 100x guaranteed”</q><small>no asset, no rule, and nobody guarantees anything <button type="button" data-try="make me rich fast, 100x guaranteed">try it ↑</button></small></li>
+          <li><q>“buy TSLA”</q><small>an entry with no exit is a wish, not a job <button type="button" data-try="buy TSLA">try it ↑</button></small></li>
+          <li><q>“long ETH with 20x leverage”</q><small>leverage is off the menu for every agent <button type="button" data-try="long ETH with 20x leverage, take profit at 50%">try it ↑</button></small></li>
+        </ul>
+      </div>
+    </div>
+    <div class="caps">
+      <div class="cap"><b>5</b><span>agents hired per day across the whole desk</span></div>
+      <div class="cap"><b>1</b><span>hire per holder per day, however good the idea</span></div>
+      <div class="cap"><b>70</b><span>minimum clarity score before anything is hired</span></div>
+      <div class="cap"><b id="minHold">TBA</b><span>$HIREPAD you need to hold to post, set at launch</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="limits">
+  <div class="wrap">
+    <div class="sh">
+      <div><span class="kicker">Hard limits</span><h2>Enforced by the wallet,<br><em>not</em> by the prompt</h2></div>
+      <p>An agent can misread a chart. It cannot talk its way past the contract that holds its money. These six rules sit below the model and apply to every hire.</p>
+    </div>
+    <div class="lim">
+      <div><span class="k">01</span><h3>No leverage</h3><p>Spot only. No perps, no borrowing, no looping. What the agent holds is what it bought.</p></div>
+      <div><span class="k">02</span><h3>10% per position</h3><p>No single position can exceed a tenth of the agent's allocation, measured at the moment of the order.</p></div>
+      <div><span class="k">03</span><h3>−15% pauses it</h3><p>At fifteen percent below its high-water mark the wallet stops accepting orders until the board votes.</p></div>
+      <div><span class="k">04</span><h3>Listed assets only</h3><p>The wallet can only swap into tokens on the desk's public list. Everything else reverts.</p></div>
+      <div><span class="k">05</span><h3>Funds go one way</h3><p>An agent can send money only back to the treasury. Not to the author, not to a new address, not to itself.</p></div>
+      <div><span class="k">06</span><h3>Everything is public</h3><p>Orders, skipped signals, fees and votes are on Robinhood Chain and readable in the explorer.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="s" id="rollout">
+  <div class="wrap">
+    <div class="sh">
+      <div><span class="kicker">Rollout</span><h2>What works today<br>and <em>what comes next</em></h2></div>
+      <p>We would rather say plainly what is live than let a nice page imply more. This list changes as each part ships.</p>
+    </div>
+    <div class="roll">
+      <div class="card now"><span class="pill"><i class="dot ok"></i>now</span><h3>The desk, in preview</h3><ul><li>Write a post and see how the desk scores it</li><li>See the agent spec it would produce</li><li>Connect a wallet on Robinhood Chain and sign your post</li></ul></div>
+      <div class="card"><span class="pill"><i class="dot acc"></i>at launch</span><h3>$HIREPAD and probation</h3><ul><li>$HIREPAD goes live on Robinhood Chain</li><li>Posting opens for holders, 5 hires a day</li><li>Hired agents start seven days of paper trading</li></ul></div>
+      <div class="card"><span class="pill"><i class="dot"></i>after</span><h3>Money and the board</h3><ul><li>Treasury funds agents that pass probation</li><li>Weekly board votes with $HIREPAD weight</li><li>Author payouts from profitable weeks</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <span class="kicker">The desk is open for posts</span>
+    <h2>You have the idea.<br>Let an agent <em>do the shift.</em></h2>
+    <p>One post, written the way you would explain it to a friend who trades. If the agent is good, you get paid for having thought of it.</p>
+    <div class="cta">
+      <a class="btn acc" href="#desk" id="toDesk2">Write a job post <span class="arrow">→</span></a>
+      <button class="btn ghost" type="button" id="wBtn2">Connect wallet</button>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <a class="brand" href="#top"><svg><use href="#mark"/></svg><span>HirePad</span></a>
+      <p style="margin:10px 0 0">AI trading agents on Robinhood Chain · chain ID 4663</p>
+    </div>
+    <div class="fl">
+      <a href="#how">How it works</a><a href="#money">Money</a><a href="#board">Board</a><a href="#rules">Rules</a>
+      <a class="xLink" href="#">X</a>
+      <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noopener">Explorer</a>
+    </div>
+    <p class="risk">Agents trade real markets and can lose money, including all of an allocation. Past results of any agent say nothing certain about the next week, and nothing on this page is a promise of returns or investment advice. Tokenized stocks and meme coins may not be available in every country.</p>
+  </div>
+</footer>
+
+<div class="ov" id="ov" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="modal">
+    <div class="modal-h"><h3 id="mTitle">Connect wallet</h3><button class="x" id="mClose" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 2l10 10M12 2L2 12"/></svg></button></div>
+    <div class="modal-b" id="mBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ SETTINGS ============ */
+window.CONTRACT = "";      /* $HIREPAD contract address on Robinhood Chain */
+window.TWITTER  = "";      /* link to X */
+window.BUY_URL  = "";      /* buy link — empty until launch */
+window.MIN_HOLD = "";      /* $HIREPAD needed to post, e.g. "100000" — empty = TBA */
+/* ================================== */
+
+var CA=(window.CONTRACT||"").trim(), TW=(window.TWITTER||"").trim(), BUY=(window.BUY_URL||"").trim(), MINH=(window.MIN_HOLD||"").trim();
+if(CA){
+  document.querySelectorAll('.ca-val').forEach(function(e){ e.textContent=CA.slice(0,6)+'…'+CA.slice(-4); });
+  document.getElementById('caBox').addEventListener('click',function(){
+    var b=this.querySelector('b'), old=b.textContent;
+    navigator.clipboard.writeText(CA).then(function(){ b.textContent='copied'; setTimeout(function(){ b.textContent=old; },1200); });
+  });
+}
+if(TW){ document.querySelectorAll('#xBtn,.xLink').forEach(function(a){ a.href=TW; a.target='_blank'; a.rel='noopener'; }); }
+else { document.querySelectorAll('#xBtn,.xLink').forEach(function(a){ a.addEventListener('click',function(e){ e.preventDefault(); }); }); }
+var buy=document.getElementById('buyBtn');
+if(buy){
+  if(BUY){ buy.href=BUY; buy.target='_blank'; buy.rel='noopener'; buy.classList.remove('soon'); }
+  else{ buy.addEventListener('click',function(e){ e.preventDefault(); }); }
+}
+if(MINH){ document.getElementById('minHold').textContent=Number(MINH).toLocaleString('en-US'); }
+</script>
+
+<script>
+(function(){
+"use strict";
+var $=function(id){ return document.getElementById(id); };
+function store(k,v){ try{ if(v===undefined) return localStorage.getItem(k); if(v===null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){ return null; } }
+
+/* ---------- sound ---------- */
+var AC=null, sfx=store('hp_snd')!=='0';
+function ac(){ if(!AC){ try{ AC=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ return null; } } if(AC.state==='suspended') AC.resume(); return AC; }
+function tone(f1,f2,dur,type,g){
+  if(!sfx) return; var c=ac(); if(!c) return;
+  var o=c.createOscillator(), gg=c.createGain(), t=c.currentTime;
+  o.type=type||'sine'; o.frequency.setValueAtTime(f1,t);
+  if(f2&&f2!==f1) o.frequency.exponentialRampToValueAtTime(f2,t+dur);
+  gg.gain.setValueAtTime(.0001,t); gg.gain.exponentialRampToValueAtTime(g||.04,t+.008);
+  gg.gain.exponentialRampToValueAtTime(.0001,t+dur);
+  o.connect(gg); gg.connect(c.destination); o.start(t); o.stop(t+dur+.03);
+}
+var S={
+  tick:function(){ tone(1850,1650,.035,'sine',.018); },
+  line:function(i){ tone(620+i*55,620+i*55,.06,'triangle',.028); },
+  ok:function(){ tone(660,660,.09,'sine',.04); setTimeout(function(){ tone(990,990,.16,'sine',.04); },90); },
+  no:function(){ tone(260,180,.2,'triangle',.05); },
+  click:function(){ tone(420,380,.04,'square',.012); },
+  sign:function(){ tone(520,1040,.12,'sine',.04); setTimeout(function(){ tone(1320,1320,.2,'sine',.03); },120); }
+};
+var sndBtn=$('sndBtn');
+function paintSnd(){ sndBtn.classList.toggle('off',!sfx); sndBtn.setAttribute('aria-label',sfx?'Sound on':'Sound off'); }
+paintSnd();
+sndBtn.addEventListener('click',function(){ sfx=!sfx; store('hp_snd',sfx?'1':'0'); paintSnd(); if(sfx) S.click(); });
+
+/* ---------- toast ---------- */
+var tT=null;
+function toast(msg){ var t=$('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(tT); tT=setTimeout(function(){ t.classList.remove('show'); },2800); }
+
+/* ---------- strip ---------- */
+(function(){
+  var items=['<b>Robinhood Chain</b> · chain ID 4663','the desk hires at clarity <i>70+</i>','<b>5</b> hires a day, <b>1</b> per holder','seven days on paper before any money','performance fee <b>20%</b> · half to the author','<i>−15%</i> drawdown pauses the wallet','the board meets every <b>Friday</b>','no leverage · no perps · listed assets only'];
+  var h=items.map(function(s){ return '<span>'+s+'</span>'; }).join('');
+  $('track').innerHTML=h+h;
+})();
+
+/* ---------- avatar (deterministic pixel badge) ---------- */
+function hash(s){ var h=2166136261>>>0; for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h>>>0; }
+function rng(seed){ var x=seed||1; return function(){ x^=x<<13; x>>>=0; x^=x>>>17; x^=x<<5; x>>>=0; return x/4294967296; }; }
+var PAL=[['#FF5A1F','#FFE3D6'],['#17915A','#DDF3E7'],['#3E63DD','#DFE6FB'],['#B97A00','#FFF0CC'],['#8E4EC6','#EFE3FA'],['#12130F','#E8E6DE']];
+function drawAvatar(cv,seed,dark){
+  var r=rng(seed), p=PAL[seed%PAL.length], c=cv.getContext('2d'), W=cv.width, n=6, u=W/n;
+  c.clearRect(0,0,W,W);
+  c.fillStyle=dark?'#26271F':p[1]; c.fillRect(0,0,W,W);
+  for(var y=0;y<n;y++) for(var x=0;x<3;x++){
+    if(r()>.52){ c.fillStyle=p[0]; c.fillRect(x*u,y*u,u,u); c.fillRect((n-1-x)*u,y*u,u,u); }
+  }
+  c.fillStyle=dark?'#ECEAE2':'#fff';
+  c.fillRect(1.5*u,2*u,u*.9,u*.9); c.fillRect(3.6*u,2*u,u*.9,u*.9);
+  c.fillStyle='#12130F';
+  c.fillRect(1.8*u,2.3*u,u*.4,u*.4); c.fillRect(3.9*u,2.3*u,u*.4,u*.4);
+}
+
+/* ---------- the desk: parser ---------- */
+var STOCKS=['NVDA','TSLA','AAPL','MSFT','AMZN','META','GOOGL','GOOG','HOOD','COIN','PLTR','AMD','NFLX','SPY','QQQ','MSTR','INTC','UBER','DIS','NKE','YUM','MCD','SBUX','KO','PEP','BABA','SHOP','ARM','AVGO','ORCL','CRM','GME','AMC','RDDT','SNAP'];
+var BAD=[
+  [/guarantee/,'Nobody can guarantee a result, so the desk does not hire for one.'],
+  [/\b\d{2,4}\s?x\b(?!\s*lev)/,'A target like "100x" is a hope, not an exit rule.'],
+  [/(make|get) (me )?rich|get rich|free money/,'"Make me rich" does not tell an agent what to do on Monday.'],
+  [/leverage|\blev\b|\bperps?\b|\bshort(ing)?\b|margin/,'Leverage, perps and shorting are off the menu for every agent.'],
+  [/all[- ]?in|entire (wallet|treasury)|whole treasury/,'Position size is capped at 10% of the allocation, so "all in" cannot be followed.'],
+  [/insider|pump (it|the|this)|rug|wash/,'The desk does not hire for manipulation of any kind.']
+];
+function pct(s){ var m=s.match(/[-−+]?\s?(\d+(?:\.\d+)?)\s?%/); return m?Number(m[1]):null; }
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+function parse(raw){
+  var t=' '+raw.toLowerCase().replace(/−/g,'-')+' ';
+  var R={assets:[],entry:null,exit:[],horizon:null,style:null,size:'5% of allocation per position',bad:[],score:0,missing:[]};
+  /* assets */
+  var seen={};
+  var up=raw.replace(/−/g,'-');
+  var m, re=/\$([A-Za-z][A-Za-z0-9]{1,9})/g;
+  while((m=re.exec(up))){ var k=m[1].toUpperCase(); if(!seen[k]){ seen[k]=1; R.assets.push(k); } }
+  STOCKS.forEach(function(s){ if(!seen[s] && new RegExp('\\b'+s+'\\b','i').test(up)){ seen[s]=1; R.assets.push(s); } });
+  if(/\beth(ereum)?\b/.test(t) && !seen.ETH){ seen.ETH=1; R.assets.push('ETH'); }
+  var memeU=/(new |fresh )?(meme ?coins?|memes|launches|new coins|new tokens)/.test(t);
+  var stockU=/\b(stocks?|tech|chip ?makers|magnificent)\b/.test(t) && !R.assets.length;
+  /* style + entry */
+  var dcaM=t.match(/every (day|week|monday|tuesday|wednesday|thursday|friday|month|morning)|each (day|week|month)|\bweekly\b(?! (high|low|close|open|range|chart))|\bdaily\b(?! (high|low|close|open|range|chart))|\bdca\b/);
+  if(dcaM){ R.style='accumulate'; R.entry='Buys on a schedule: '+dcaM[0].trim(); }
+  if(/\b(drop|drops|dropped|dip|dips|falls?|red day|sell-?off|down)\b/.test(t) && !R.entry){
+    var p=null, dm=t.match(/(drop|drops|dips?|falls?|down)[^,.;]*?(\d+(?:\.\d+)?)\s?%/); if(dm) p=Number(dm[2]);
+    R.style='dip'; R.entry='Buys after a drop'+(p?' of '+p+'% or more':'')+(/in a day|intraday|same day/.test(t)?' within a day':'');
+  }
+  if(/breakout|breaks? (out|above)|new high|all[- ]time high|momentum|trend/.test(t) && !R.entry){
+    R.style='momentum'; R.entry=/weekly high/.test(t)?'Buys a break above the weekly high':(/volume/.test(t)?'Buys strength confirmed by volume':'Buys a confirmed breakout');
+  }
+  if(memeU && !R.entry && /volume|first (hour|minutes?)|launch/.test(t)){
+    R.style='launch'; R.entry='Buys new launches that show real volume'+(/first hour/.test(t)?' in the first hour':'');
+  }
+  if(/earnings|report|fed |cpi|news/.test(t) && !R.entry){ R.style='event'; R.entry='Trades around a scheduled event'; }
+  if(!R.entry){ var gm=t.match(/\b(buy|buys|get in|enter|long)\b[^,.;]{0,30}\b(when|if|at|below|under|above)\b[^,.;]{2,40}/); if(gm){ R.style=R.style||'rule'; R.entry=cap(gm[0].trim()); } }
+  if(memeU){ R.assets.push('new meme coins (inside the floors)'); if(!R.style) R.style='launch'; }
+  if(stockU){ R.assets.push('listed stock tokens'); }
+  /* exits */
+  var tp=t.match(/(take profit|sell|exit|out|close)( it)?( at| on| after)?\s*\+?\s?(\d+(?:\.\d+)?)\s?%/);
+  if(tp) R.exit.push('Takes profit at +'+tp[4]+'%');
+  var sl=t.match(/(stop|cut|stop[- ]?loss|stop out)[^,.;%]{0,14}?-?\s?(\d+(?:\.\d+)?)\s?%/);
+  if(sl){ R.exit.push((/trail/.test(t)?'Trailing stop ':'Stops out at −')+(/trail/.test(t)?sl[2]+'%':sl[2]+'%')); }
+  else if(/trail(ing)?[^,.;]{0,12}(\d+(?:\.\d+)?)\s?%/.test(t)){ R.exit.push('Trailing stop '+t.match(/trail(ing)?[^,.;]{0,12}?(\d+(?:\.\d+)?)\s?%/)[2]+'%'); }
+  if(/never sell|hold forever|don.?t sell/.test(t)){ R.exit.push('Never sells; stops adding on its stop rule'); }
+  var within=t.match(/(out|exit|close|sell)[^,.;]{0,10}within (\d+) ?(hours?|h|days?|weeks?)/);
+  if(within) R.exit.push('Closes anything older than '+within[2]+' '+within[3]);
+  var hu=t.match(/hold (for )?(up to )?(\d+|one|two|three|a few) ?(hours?|days?|weeks?|months?)/);
+  if(hu) R.exit.push('Closes after '+hu[3]+' '+hu[4]+' at most');
+  if(!R.exit.length && /\b(sell|exit|take profit|stop)\b/.test(t)) R.exit.push('Has an exit, but no level. Add a number.');
+  /* horizon */
+  if(/\b\d+ ?(hours?|h)\b|intraday|same day|minutes?/.test(t)) R.horizon='Intraday';
+  else if(/weeks?|days?|friday|monday/.test(t)) R.horizon=R.style==='accumulate'?'Long-term, on a schedule':'Swing, days to weeks';
+  else if(/months?|years?|long[- ]term|never sell|forever/.test(t)) R.horizon='Position, months';
+  /* size */
+  if(/small|careful|safe|low risk|tiny/.test(t)) R.size='2% of allocation per order';
+  else if(/aggressive|big|large/.test(t)) R.size='10% of allocation (the ceiling)';
+  /* bad */
+  BAD.forEach(function(b){ if(b[0].test(t)) R.bad.push(b[1]); });
+  /* score */
+  var s=0;
+  if(R.assets.length) s+=30; else R.missing.push(['what it trades','name a ticker like NVDA or say "new meme coins"']);
+  if(R.entry) s+=30; else R.missing.push(['when it gets in','a drop, a breakout, a schedule, a level']);
+  var realExit=R.exit.filter(function(e){ return !/no level/.test(e); }).length;
+  if(realExit) s+= realExit>1?25:18; else R.missing.push(['when it gets out','a profit target, a stop, or a time limit']);
+  if(R.horizon) s+=15; else if(raw.trim().length) R.missing.push(['how long','hours, days, weeks or months']);
+  if(raw.trim().length<18) s=Math.min(s,30);
+  if(R.bad.length) s=Math.min(s,25);
+  R.score=s;
+  return R;
+}
+var STYLE={dip:'Dip Buyer',momentum:'Breakout Runner',accumulate:'Accumulator',launch:'Launch Scout',event:'Event Desk',rule:'Rule Trader'};
+function agentName(R){
+  var a=R.assets[0]||'Desk'; if(/meme/.test(a)) a='Meme';
+  if(R.assets.length>1 && !/meme|listed/.test(R.assets[1])) a=R.assets[0]+' + '+R.assets[1];
+  return a+' '+(STYLE[R.style]||'Generalist');
+}
+
+var post=$('post'), fill=$('fill'), scoreEl=$('score'), need=$('need'), hint=$('hint'), agent=$('agent');
+var lastTick=0, cur=null;
+function live(){
+  var v=post.value; $('chars').textContent=v.length+' / 400';
+  var R=parse(v); cur=R;
+  fill.style.width=R.score+'%'; fill.classList.toggle('ok',R.score>=70);
+  scoreEl.textContent=R.score;
+  need.textContent=R.score>=70?'ready to hire':'the desk hires at 70+';
+  if(!v.trim()){ hint.innerHTML='Say <b>what it trades</b>, <b>when it gets in</b> and <b>when it gets out</b>. A timeframe helps.'; }
+  else if(R.bad.length){ hint.innerHTML='<b>This one will be turned down.</b> '+R.bad[0]; }
+  else if(R.missing.length){ hint.innerHTML='Still missing: <b>'+R.missing.map(function(m){return m[0];}).join('</b>, <b>')+'</b>.'; }
+  else { hint.innerHTML='<b>Clear brief.</b> Screen it to see the agent the desk would hire.'; }
+  var now=Date.now(); if(now-lastTick>60){ S.tick(); lastTick=now; }
+}
+post.addEventListener('input',live);
+
+function setPost(t,go){
+  post.value=t; live();
+  if(go) screen();
+}
+document.querySelectorAll('#chips .chip').forEach(function(b){ b.addEventListener('click',function(){ S.click(); setPost(b.getAttribute('data-t'),true); }); });
+document.querySelectorAll('[data-try]').forEach(function(b){ b.addEventListener('click',function(){ setPost(b.getAttribute('data-try'),true); $('desk').scrollIntoView({behavior:'smooth',block:'center'}); }); });
+
+var hires=[];
+try{ hires=JSON.parse(store('hp_hires')||'[]')||[]; }catch(e){ hires=[]; }
+function todayKey(){ return new Date().toISOString().slice(0,10); }
+hires=hires.filter(function(h){ return h.d===todayKey(); });
+function paintSlots(){
+  var n=Math.min(5,hires.length);
+  document.querySelectorAll('#slots i').forEach(function(i,k){ i.classList.toggle('on',k<n); });
+  $('slotTxt').textContent=n+' / 5 hires';
+}
+paintSlots();
+
+var seq=0;
+function screen(){
+  var R=cur||parse(post.value);
+  if(!post.value.trim()){ post.focus(); toast('Write a job post first — or tap one of the examples.'); S.no(); return; }
+  var id=hash(post.value.trim().toLowerCase());
+  var my=++seq;
+  agent.classList.remove('show'); void agent.offsetWidth; agent.classList.add('show');
+  drawAvatar($('av'),id,true);
+  var ok=R.score>=70 && !R.bad.length;
+  $('aName').textContent=ok?agentName(R):'Not hired';
+  $('aId').textContent='H-'+String(id%10000).padStart(4,'0')+' · clarity '+R.score+'/100';
+  var st=$('aSt'); st.className='st-pill '+(ok?'pv':'no'); st.textContent=ok?'preview':'turned down';
+  var rows=[
+    ['Trades', R.assets.length?R.assets.join(', '):'<span class="miss">not stated</span>'],
+    ['Gets in', R.entry||'<span class="miss">not stated</span>'],
+    ['Gets out', R.exit.length?R.exit.join(' · '):'<span class="miss">not stated</span>'],
+    ['Horizon', R.horizon||'<span class="miss">not stated</span>'],
+    ['Size', R.size],
+    ['Wallet', ok?'Robinhood Chain · assigned at hire':'—']
+  ];
+  var spec=$('spec'); spec.innerHTML='';
+  rows.forEach(function(r,i){
+    var d=document.createElement('div'); d.innerHTML='<dt>'+r[0]+'</dt><dd>'+r[1]+'</dd>'; spec.appendChild(d);
+    setTimeout(function(){ if(my!==seq) return; d.classList.add('in'); S.line(i); },90+i*110);
+  });
+  $('okPart').style.display=ok?'':'none';
+  var rej=$('rej'); rej.classList.toggle('show',!ok);
+  if(!ok){
+    $('rejP').textContent=R.bad.length?'The desk will not hire for this post.':'The desk needs a clearer brief before it hires.';
+    var L=R.bad.map(function(b){ return '<li>'+b+'</li>'; }).concat(R.missing.map(function(m){ return '<li>Add <b>'+m[0]+'</b>: '+m[1]+'.</li>'; }));
+    $('rejL').innerHTML=L.join('');
+    setTimeout(function(){ if(my===seq) S.no(); },200);
+  } else {
+    setTimeout(function(){ if(my===seq) S.ok(); },90+rows.length*110);
+    if(!hires.some(function(h){ return h.id===id; })){ hires.push({id:id,d:todayKey()}); store('hp_hires',JSON.stringify(hires.slice(-5))); paintSlots(); }
+    paintSign(id);
+  }
+  cur.id=id;
+}
+$('hireBtn').addEventListener('click',screen);
+post.addEventListener('keydown',function(e){ if(e.key==='Enter'&&(e.metaKey||e.ctrlKey)){ e.preventDefault(); screen(); } });
+function goDesk(e){ e.preventDefault(); $('desk').scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(function(){ post.focus({preventScroll:true}); },450); }
+$('toDesk').addEventListener('click',goDesk);
+$('toDesk2').addEventListener('click',goDesk);
+
+/* ---------- money calculator ---------- */
+function usd(n){ var s=Math.round(Math.abs(n)).toLocaleString('en-US'); return (n<0?'−$':'$')+s; }
+function calc(){
+  var A=+$('rA').value, r=+$('rR').value, P=A*r/100;
+  $('vA').textContent=usd(A); $('vR').textContent=(r>0?'+':r<0?'−':'')+Math.abs(r).toFixed(1)+'%';
+  $('oP').textContent=(P>0?'+':'')+usd(P);
+  var F=P>0?P*.2:0;
+  $('oF').textContent=usd(F); $('oAu').textContent=usd(F/2); $('oT').textContent=usd(F/2);
+  var M;
+  if(r<=-15) M='At −15% the wallet pauses itself. No fee, no top-up, and the board votes on whether it comes back.';
+  else if(r<0) M='No fee is taken. The loss stays inside the allocation and the drawdown counter moves to '+r.toFixed(1)+'% of the −15% limit.';
+  else if(r===0) M='A flat week: no profit, no fee.';
+  else M='The other 80% of the profit stays in the agent’s allocation and keeps working next week.';
+  $('oM').textContent=M;
+}
+['rA','rR'].forEach(function(k){ $(k).addEventListener('input',function(){ calc(); S.tick(); }); });
+calc();
+
+/* flow pulse */
+(function(){
+  var pk=$('pk'), path=[[190,62],[235,62],[405,62],[450,62],[535,94],[535,154],[510,218],[510,264],[400,296],[300,296],[300,350],[274,350]];
+  var seg=0,t=0;
+  function step(){
+    var a=path[seg], b=path[seg+1]; t+=.035;
+    if(t>=1){ t=0; seg++; if(seg>=path.length-1) seg=0; a=path[seg]; b=path[seg+1]; }
+    pk.setAttribute('cx',a[0]+(b[0]-a[0])*t); pk.setAttribute('cy',a[1]+(b[1]-a[1])*t);
+    requestAnimationFrame(step);
+  }
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches) requestAnimationFrame(step);
+})();
+
+/* ---------- board (sample sheet) ---------- */
+var AG=[
+  {n:'NVDA Dip Buyer',a:'0x7a3f…c21e',d:'day 5 of 7',st:'pr',stl:'probation',dd:3.1,k:[61,22,17]},
+  {n:'HOOD + COIN Accumulator',a:'0x19bd…04aa',d:'week 6',st:'lv',stl:'funded',dd:6.8,k:[48,40,12]},
+  {n:'Meme Launch Scout',a:'0xe402…9f7d',d:'week 3',st:'pa',stl:'paused',dd:15,k:[18,6,76]},
+  {n:'TSLA Breakout Runner',a:'0x5c11…b830',d:'week 2',st:'lv',stl:'funded',dd:9.4,k:[39,11,50]}
+];
+var myVotes={};
+try{ myVotes=JSON.parse(store('hp_votes')||'{}')||{}; }catch(e){ myVotes={}; }
+function renderBoard(){
+  var tb=$('tb'); tb.innerHTML='';
+  AG.forEach(function(g,i){
+    var tr=document.createElement('tr');
+    var w=Math.min(100,g.dd/15*100), cls=g.dd>=15?'x':g.dd>=9?'w':'';
+    var v=myVotes[i];
+    function vb(key,label,idx){
+      var c=g.k[idx]+(v===key?1:0);
+      return '<button class="vb '+(key==='fire'?'fire ':'')+(v===key?'on':'')+'" data-i="'+i+'" data-k="'+key+'" >'+label+' <small>'+c+'%</small></button>';
+    }
+    tr.innerHTML='<td><div class="nm"><canvas width="60" height="60"></canvas><div><b>'+g.n+'</b><span>'+g.a+' · '+g.d+'</span></div></div></td>'+
+      '<td><span class="stt '+g.st+'">'+g.stl+'</span></td>'+
+      '<td><div class="dd"><div class="b"><i class="'+cls+'" style="width:'+w+'%"></i></div><span>'+(g.dd>=15?'−15% hit':'−'+g.dd.toFixed(1)+'%')+'</span></div></td>'+
+      '<td><div class="votes">'+vb('keep','Keep',0)+vb('scale','Scale',1)+vb('fire','Fire',2)+'</div></td>';
+    tb.appendChild(tr);
+    drawAvatar(tr.querySelector('canvas'),hash(g.n)+7,false);
+  });
+  tb.querySelectorAll('.vb').forEach(function(b){
+    b.addEventListener('click',function(){
+      if(!W.addr){ toast('Connect a wallet on Robinhood Chain to vote on the sample sheet.'); openModal(); return; }
+      var i=b.getAttribute('data-i'), k=b.getAttribute('data-k');
+      myVotes[i]=myVotes[i]===k?undefined:k; store('hp_votes',JSON.stringify(myVotes));
+      S.click(); renderBoard();
+    });
+  });
+}
+
+/* =================================================================
+   WALLET — EIP-6963 discovery + EIP-1193, Robinhood Chain (4663)
+   ================================================================= */
+var CHAIN={
+  chainId:'0x133f',
+  chainName:'Robinhood Chain',
+  nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},
+  rpcUrls:['https://rpc.mainnet.chain.robinhood.com'],
+  blockExplorerUrls:['https://robinhoodchain.blockscout.com']
+};
+var W={providers:{},prov:null,info:null,addr:null,chain:null,eth:null,hire:null,dec:18};
+window.addEventListener('eip6963:announceProvider',function(e){
+  var d=e.detail; if(!d||!d.info||!d.provider) return;
+  W.providers[d.info.uuid]=d;
+  if($('ov').classList.contains('show') && !W.addr) renderPicker();
+});
+window.dispatchEvent(new Event('eip6963:requestProvider'));
+
+function short(a){ return a?a.slice(0,6)+'…'+a.slice(-4):''; }
+function isOk(){ return W.chain && W.chain.toLowerCase()===CHAIN.chainId; }
+function fmtUnits(hex,dec,dp){
+  try{
+    var v=BigInt(hex||'0x0'), base=BigInt(10)**BigInt(dec);
+    var whole=v/base, frac=v%base;
+    var f=frac.toString().padStart(dec,'0').slice(0,dp).replace(/0+$/,'');
+    return whole.toLocaleString('en-US')+(f?'.'+f:'');
+  }catch(e){ return '—'; }
+}
+function listOptions(){
+  var list=Object.keys(W.providers).map(function(k){ return W.providers[k]; });
+  if(!list.length && window.ethereum){
+    list.push({info:{uuid:'legacy',name:window.ethereum.isMetaMask?'MetaMask':'Browser wallet',icon:'',rdns:'legacy'},provider:window.ethereum});
+  }
+  return list;
+}
+
+var ov=$('ov'), mBody=$('mBody');
+function openModal(){ ov.classList.add('show'); if(W.addr) renderAccount(); else renderPicker(); window.dispatchEvent(new Event('eip6963:requestProvider')); }
+function closeModal(){ ov.classList.remove('show'); }
+$('mClose').addEventListener('click',closeModal);
+ov.addEventListener('click',function(e){ if(e.target===ov) closeModal(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeModal(); });
+$('wBtn').addEventListener('click',function(){ S.click(); openModal(); });
+$('wBtn2').addEventListener('click',function(){ S.click(); openModal(); });
+
+function netCard(){
+  return '<div class="netcard"><span class="ic"><svg width="18" height="18"><use href="#chain"/></svg></span><div><b>Robinhood Chain</b><span>chain ID 4663 · ETH for gas</span></div></div>';
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function renderPicker(err){
+  $('mTitle').textContent='Connect wallet';
+  var list=listOptions(), h=netCard();
+  if(list.length){
+    h+='<div class="wlist">'+list.map(function(p,i){
+      var ic=p.info.icon&&/^data:image\//.test(p.info.icon)?'<img alt="" src="'+esc(p.info.icon)+'">':'<span class="gic"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#74736B" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="2"/><path d="M10.5 8.5h1.5"/></svg></span>';
+      return '<button class="wopt" data-u="'+esc(p.info.uuid)+'">'+ic+'<b>'+esc(p.info.name)+'</b><small>detected</small></button>';
+    }).join('')+'</div>';
+  } else {
+    var here=location.host+location.pathname;
+    h+='<div class="empty">No wallet found in this browser. Install an EVM wallet such as MetaMask or Rabby, or open this page inside your wallet app’s browser.<br><br><a href="https://metamask.app.link/dapp/'+esc(here)+'" rel="noopener">Open in MetaMask mobile →</a></div>';
+  }
+  h+='<div class="merr'+(err?' show':'')+'" id="mErr">'+(err?esc(err):'')+'</div>';
+  h+='<p class="mfoot">If the network is not in your wallet yet, HirePad asks it to add Robinhood Chain with the official RPC and explorer. Connecting only shares your address.</p>';
+  mBody.innerHTML=h;
+  mBody.querySelectorAll('.wopt').forEach(function(b){
+    b.addEventListener('click',function(){
+      var u=b.getAttribute('data-u'), p=u==='legacy'?listOptions()[0]:W.providers[u];
+      b.classList.add('busy'); b.querySelector('small').textContent='check your wallet…';
+      connect(p).catch(function(e){ renderPicker(niceErr(e)); });
+    });
+  });
+}
+function niceErr(e){
+  var c=e&&(e.code||(e.data&&e.data.originalError&&e.data.originalError.code));
+  if(c===4001) return 'Request rejected in the wallet.';
+  if(c===-32002) return 'Your wallet already has a pending request. Open it and finish or cancel that first.';
+  return (e&&e.message)?e.message.slice(0,160):'Something went wrong while connecting.';
+}
+function req(method,params){ return W.prov.request({method:method,params:params||[]}); }
+
+function switchChain(){
+  return req('wallet_switchEthereumChain',[{chainId:CHAIN.chainId}]).catch(function(e){
+    var c=e&&(e.code||(e.data&&e.data.originalError&&e.data.originalError.code));
+    if(c===4902||c===-32603||/unrecognized|not added|unknown chain/i.test(e&&e.message||'')){
+      return req('wallet_addEthereumChain',[CHAIN]);
+    }
+    throw e;
+  }).then(function(){ return req('eth_chainId'); }).then(function(id){ W.chain=id; });
+}
+
+var bound=null;
+function bind(p){
+  if(bound===p||!p.on) return;
+  if(bound&&bound.removeListener){ try{ bound.removeListener('accountsChanged',onAcc); bound.removeListener('chainChanged',onChain); }catch(e){} }
+  p.on('accountsChanged',onAcc); p.on('chainChanged',onChain); bound=p;
+}
+function onAcc(a){ if(!a||!a.length){ disconnect(true); return; } W.addr=a[0]; refresh(); }
+function onChain(id){ W.chain=id; refresh(); }
+
+function connect(p){
+  if(!p) return Promise.reject(new Error('No wallet selected.'));
+  W.prov=p.provider; W.info=p.info;
+  return req('eth_requestAccounts').then(function(a){
+    if(!a||!a.length) throw new Error('The wallet returned no accounts.');
+    W.addr=a[0]; bind(W.prov);
+    return req('eth_chainId');
+  }).then(function(id){
+    W.chain=id;
+    if(!isOk()) return switchChain().catch(function(e){ toast('Connected, but still on another network. '+niceErr(e)); });
+  }).then(function(){
+    store('hp_wallet',W.info.rdns||W.info.uuid);
+    S.sign(); refresh(); renderAccount();
+    toast('Connected '+short(W.addr)+(isOk()?' on Robinhood Chain':''));
+  });
+}
+function disconnect(silent){
+  if(W.prov&&!silent){ try{ req('wallet_revokePermissions',[{eth_accounts:{}}]).catch(function(){}); }catch(e){} }
+  W.addr=null; W.chain=null; W.eth=null; W.hire=null;
+  store('hp_wallet',null);
+  paintWallet(); renderBoard(); paintSign();
+  if(ov.classList.contains('show')) renderPicker();
+  if(!silent) toast('Disconnected');
+}
+
+function refresh(){
+  paintWallet(); renderBoard(); paintSign();
+  if(!W.addr||!isOk()){ if(ov.classList.contains('show')&&W.addr) renderAccount(); return; }
+  var addr=W.addr;
+  req('eth_getBalance',[addr,'latest']).then(function(b){ if(addr!==W.addr) return; W.eth=b; if(ov.classList.contains('show')) renderAccount(); }).catch(function(){});
+  if(CA){
+    var data='0x70a08231'+addr.toLowerCase().replace(/^0x/,'').padStart(64,'0');
+    req('eth_call',[{to:CA,data:'0x313ce567'},'latest']).then(function(d){ var n=parseInt(d,16); if(n>=0&&n<=36) W.dec=n; }).catch(function(){})
+    .then(function(){ return req('eth_call',[{to:CA,data:data},'latest']); })
+    .then(function(b){ if(addr!==W.addr) return; W.hire=b; paintWallet(); renderBoard(); if(ov.classList.contains('show')) renderAccount(); }).catch(function(){});
+  }
+}
+
+function paintWallet(){
+  var b=$('wBtn'), b2=$('wBtn2');
+  b.classList.remove('bad');
+  if(!W.addr){ b.innerHTML='<span class="wl">Connect wallet</span>'; b2.textContent='Connect wallet'; $('deskNet').textContent='preview'; }
+  else if(!isOk()){ b.classList.add('bad'); b.innerHTML='<span class="net"><i class="dot bad"></i>Wrong network</span>'; b2.textContent='Switch to Robinhood Chain'; $('deskNet').textContent='wrong network'; }
+  else { b.innerHTML='<span class="net"><i class="dot ok"></i><span class="addr">'+short(W.addr)+'</span></span>'; b2.textContent='Wallet connected'; $('deskNet').textContent=short(W.addr); }
+  var vw=$('vw');
+  if(!W.addr) vw.innerHTML='<i class="dot"></i>connect a wallet to see your weight';
+  else if(!CA) vw.innerHTML='<i class="dot ok"></i>'+short(W.addr)+' · weight counts from launch';
+  else vw.innerHTML='<i class="dot ok"></i>your weight · '+(W.hire?fmtUnits(W.hire,W.dec,0):'…')+' $HIREPAD';
+}
+
+function renderAccount(){
+  if(!W.addr){ renderPicker(); return; }
+  $('mTitle').textContent='Your wallet';
+  var ok=isOk();
+  var holdTxt, canPost;
+  if(!CA){ holdTxt='live at launch'; canPost='<b>opens at launch</b>'; }
+  else if(W.hire==null){ holdTxt='…'; canPost='<b>…</b>'; }
+  else {
+    holdTxt=fmtUnits(W.hire,W.dec,2);
+    if(MINH){ var need=BigInt(Math.floor(Number(MINH)))*(BigInt(10)**BigInt(W.dec)); canPost=BigInt(W.hire)>=need?'<b class="ok">yes</b>':'<b class="bad">needs '+Number(MINH).toLocaleString('en-US')+'</b>'; }
+    else canPost='<b>limit set at launch</b>';
+  }
+  var signed=0; try{ signed=(JSON.parse(store('hp_signed')||'[]')||[]).filter(function(s){ return s.a===W.addr.toLowerCase(); }).length; }catch(e){}
+  var h='<div class="acct">'+
+    '<div class="who"><canvas width="80" height="80" id="accAv"></canvas><div><b>'+short(W.addr)+'</b><span>'+esc(W.info?W.info.name:'Wallet')+'</span></div><button class="btn sm ghost cp" id="cpA">Copy</button></div>'+
+    '<div class="kv">'+
+      '<div><span>Network</span>'+(ok?'<b class="ok">Robinhood Chain</b>':'<b class="bad">chain '+parseInt(W.chain,16)+'</b>')+'</div>'+
+      '<div><span>ETH</span><b>'+(ok?(W.eth?fmtUnits(W.eth,18,5):'…'):'—')+'</b></div>'+
+      '<div><span>$HIREPAD</span><b>'+(ok?holdTxt:'—')+'</b></div>'+
+      '<div><span>Can post</span>'+(ok?canPost:'<b>—</b>')+'</div>'+
+      '<div><span>Signed posts</span><b>'+signed+'</b></div>'+
+    '</div>'+
+    '<div class="btns">'+(ok?'<a class="btn sm ghost" target="_blank" rel="noopener" href="'+CHAIN.blockExplorerUrls[0]+'/address/'+W.addr+'">Explorer ↗</a>':'<button class="btn sm acc" id="swN">Switch network</button>')+
+    '<button class="btn sm ghost" id="dcB">Disconnect</button></div>'+
+  '</div>';
+  mBody.innerHTML=h;
+  drawAvatar($('accAv'),hash(W.addr.toLowerCase()),false);
+  $('cpA').addEventListener('click',function(){ var b=this; navigator.clipboard.writeText(W.addr).then(function(){ b.textContent='Copied'; setTimeout(function(){ b.textContent='Copy'; },1200); }); });
+  $('dcB').addEventListener('click',function(){ disconnect(false); });
+  if($('swN')) $('swN').addEventListener('click',function(){ switchChain().then(refresh).catch(function(e){ toast(niceErr(e)); }); });
+}
+
+/* sign post */
+function paintSign(){
+  var b=$('signBtn'), n=$('aNote'); if(!b) return;
+  b.classList.remove('done');
+  var id=cur&&cur.id;
+  var done=false;
+  if(W.addr&&id!=null){ try{ done=(JSON.parse(store('hp_signed')||'[]')||[]).some(function(s){ return s.id===id&&s.a===W.addr.toLowerCase(); }); }catch(e){} }
+  if(!W.addr){ b.textContent='Connect to sign'; n.textContent='Wallet on Robinhood Chain is assigned at hire. Connect yours and sign the post to keep it as yours.'; }
+  else if(!isOk()){ b.textContent='Switch network'; n.textContent='Your wallet is on another network. Signing happens on Robinhood Chain.'; }
+  else if(done){ b.textContent='Signed ✓'; b.classList.add('done'); n.textContent='Signed by '+short(W.addr)+' and saved in this browser. Posting to the desk opens at launch.'; }
+  else { b.textContent='Sign post'; n.textContent='Signing costs no gas. It proves this post came from '+short(W.addr)+'.'; }
+}
+function hexUtf8(s){ var b=new TextEncoder().encode(s), h='0x'; for(var i=0;i<b.length;i++) h+=b[i].toString(16).padStart(2,'0'); return h; }
+$('signBtn').addEventListener('click',function(){
+  if(!W.addr){ openModal(); return; }
+  if(!isOk()){ switchChain().then(refresh).catch(function(e){ toast(niceErr(e)); }); return; }
+  if(this.classList.contains('done')) return;
+  var text=post.value.trim(), id=cur&&cur.id;
+  var msg='HirePad job post\n\n'+text+'\n\nagent: H-'+String(id%10000).padStart(4,'0')+'\nauthor: '+W.addr+'\nchain: 4663\nissued: '+new Date().toISOString();
+  var btn=this; btn.textContent='Check your wallet…';
+  req('personal_sign',[hexUtf8(msg),W.addr]).then(function(sig){
+    var list=[]; try{ list=JSON.parse(store('hp_signed')||'[]')||[]; }catch(e){}
+    list.push({id:id,a:W.addr.toLowerCase(),sig:sig,t:Date.now()}); store('hp_signed',JSON.stringify(list.slice(-50)));
+    S.sign(); toast('Post signed · '+sig.slice(0,10)+'…'); paintSign();
+  }).catch(function(e){ toast(niceErr(e)); paintSign(); });
+});
+
+/* silent reconnect */
+(function(){
+  var last=store('hp_wallet'); if(!last) return;
+  setTimeout(function(){
+    var list=listOptions(), p=null;
+    list.forEach(function(x){ if(x.info.rdns===last||x.info.uuid===last) p=x; });
+    if(!p&&last==='legacy') p=list[0];
+    if(!p) return;
+    p.provider.request({method:'eth_accounts'}).then(function(a){
+      if(!a||!a.length) return;
+      W.prov=p.provider; W.info=p.info; W.addr=a[0]; bind(W.prov);
+      return W.prov.request({method:'eth_chainId'}).then(function(id){ W.chain=id; refresh(); });
+    }).catch(function(){});
+  },350);
+})();
+
+renderBoard(); paintWallet();
+window.__hp={parse:parse,W:W};
+})();
+</script>
+</body>
+</html>
