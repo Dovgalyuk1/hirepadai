@@ -12,3 +12,9 @@ Static site, no build step: `index.html` + `assets/`.
 - `TWITTER` — link to X
 - `BUY_URL` — buy link; the Buy button stays inactive while empty
 - `MIN_HOLD` — tokens needed to post, e.g. "100000"; empty shows TBA
+- `WC_PROJECT_ID` — WalletConnect / Reown project id from cloud.reown.com. Turns on QR connect
+  (Robinhood Wallet, MetaMask mobile, Rabby mobile…). Without it, the modal still lists wallets that
+  support Robinhood Chain with install / open-in-app instructions. `assets/wc.js` is the bundled
+  @walletconnect/ethereum-provider 2.25.0 and loads only when WalletConnect is chosen.
+
+No audio on this site.
